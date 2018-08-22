@@ -14,25 +14,35 @@ import (
 type App struct {
 	Router *mux.Router
 	DB     *sql.DB
+  ENV    map[string] string
 }
 
-func (a *App) Initialize(user, password, host, dbname string) {
-  //connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", user, password, host, dbname)
-	connStr := fmt.Sprintf("user=macedo dbname=movies_api_development sslmode=disable")
-
-	var err error
-
-	a.DB, err = sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func (a *App) Initialize() {
+	a.initializeDB()
 	a.Router = mux.NewRouter()
 	a.initializeRoutes()
 }
 
 func (a *App) Run(addr string) {
 	log.Fatal(http.ListenAndServe(addr, a.Router))
+}
+
+func (a *App) initializeDB() {
+  var connStr string
+  var err error
+
+  if a.ENV["DATABASE_URL"] != "" {
+    connStr = a.ENV["DATABASE_URL"]
+  } else {
+    connStr = fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", a.ENV["DATABASE_USERNAME"], a.ENV["DATABASE_PASSWORD"], a.ENV["DATABASE_HOST"],  a.ENV["DATABASE_NAME"])
+  }
+
+  fmt.Println(connStr)
+
+  a.DB, err = sql.Open("postgres", connStr)
+	if err != nil {
+	  	log.Fatal(err)
+	}
 }
 
 func (a *App) initializeRoutes() {
