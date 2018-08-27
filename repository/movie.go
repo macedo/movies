@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 
-	"github.com/macedo/movies/types"
+	"github.com/macedo/movies-api/types"
 )
 
 type MovieRepo struct {

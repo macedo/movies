@@ -41,6 +41,7 @@ func main() {
 		},
 	}
 
+  app.Initialize()
 	if err := http.ListenAndServe(":8000", app.Handler()); err != nil {
 		log.Fatal(err)
 	}

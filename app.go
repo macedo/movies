@@ -2,14 +2,13 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-	"github.com/macedo/movies/repository"
+	"github.com/macedo/movies-api/repository"
 )
 
 type App struct {
@@ -47,7 +46,7 @@ func (a *App) Handler() http.Handler {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/movies", a.getMovies).Methods("GET")
-	r.HandleFunc("/movies", a.createMovie).Methods("POST")
+	//r.HandleFunc("/movies", a.createMovie).Methods("POST")
 
 	return r
 }
@@ -63,19 +62,19 @@ func (a *App) getMovies(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, movies)
 }
 
-func (a *App) createMovie(w http.ResponseWriter, r *http.Request) {
-	var m movie
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&m); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-	defer r.Body.Close()
+//func (a *App) createMovie(w http.ResponseWriter, r *http.Request) {
+	//var m repository.MovieRepo
+	//decoder := json.NewDecoder(r.Body)
+	//if err := decoder.Decode(&m); err != nil {
+		//respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		//return
+	//}
+	//defer r.Body.Close()
 
-	if err := m.createMovie(a.DB); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	//if err := m.createMovie(a.DB); err != nil {
+		//respondWithError(w, http.StatusInternalServerError, err.Error())
+		//return
+	//}
 
-	respondWithJson(w, http.StatusCreated, m)
-}
+	//respondWithJson(w, http.StatusCreated, m)
+//}
