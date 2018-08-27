@@ -9,56 +9,58 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/macedo/movies/repository"
 )
 
 type App struct {
-	Router *mux.Router
-	DB     *sql.DB
-  ENV    map[string] string
+	DB  *sql.DB
+	ENV map[string]string
+
+	movie repository.MovieRepo
 }
 
 func (a *App) Initialize() {
 	a.initializeDB()
-	a.Router = mux.NewRouter()
-	a.initializeRoutes()
-}
 
-func (a *App) Run(addr string) {
-	log.Fatal(http.ListenAndServe(addr, a.Router))
+	a.movie = repository.New(a.DB)
 }
 
 func (a *App) initializeDB() {
-  var connStr string
-  var err error
+	var connStr string
+	var err error
 
-  if a.ENV["DATABASE_URL"] != "" {
-    connStr = a.ENV["DATABASE_URL"]
-  } else {
-    connStr = fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", a.ENV["DATABASE_USERNAME"], a.ENV["DATABASE_PASSWORD"], a.ENV["DATABASE_HOST"],  a.ENV["DATABASE_NAME"])
-  }
+	if a.ENV["DATABASE_URL"] != "" {
+		connStr = a.ENV["DATABASE_URL"]
+	} else {
+		connStr = fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", a.ENV["DATABASE_USERNAME"], a.ENV["DATABASE_PASSWORD"], a.ENV["DATABASE_HOST"], a.ENV["DATABASE_NAME"])
+	}
 
-  fmt.Println(connStr)
+	fmt.Println(connStr)
 
-  a.DB, err = sql.Open("postgres", connStr)
+	a.DB, err = sql.Open("postgres", connStr)
 	if err != nil {
-	  	log.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
-func (a *App) initializeRoutes() {
-	a.Router.HandleFunc("/movies", a.getMovies).Methods("GET")
-	a.Router.HandleFunc("/movies", a.createMovie).Methods("POST")
+func (a *App) Handler() http.Handler {
+	r := mux.NewRouter()
+
+	r.HandleFunc("/movies", a.getMovies).Methods("GET")
+	r.HandleFunc("/movies", a.createMovie).Methods("POST")
+
+	return r
 }
 
 func (a *App) getMovies(w http.ResponseWriter, r *http.Request) {
-  var m movie
-  movies, err := m.getMovies(a.DB)
-  if err != nil {
-    respondWithError(w, http.StatusInternalServerError, err.Error())
-    return
-  }
-  
-  respondWithJson(w, http.StatusOK, movies)
+	movies, err := a.movie.Get()
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJson(w, http.StatusOK, movies)
 }
 
 func (a *App) createMovie(w http.ResponseWriter, r *http.Request) {

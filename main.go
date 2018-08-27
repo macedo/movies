@@ -1,9 +1,10 @@
 package main
 
 import (
-  "fmt"
-  "log"
-  "os/user"
+	"fmt"
+	"log"
+	"net/http"
+	"os/user"
 )
 
 //func GetMovieInfo() {
@@ -22,24 +23,25 @@ import (
 //fmt.Println(string(responseData))
 //}
 
-
 func main() {
-  env := getenv("ENV", "development")
+	env := getenv("ENV", "development")
 
-  user, err := user.Current()
-  if err != nil {
-    log.Fatal(err)
-  }
+	user, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  app := App{
-    ENV: map[string]string{
-      "DATABASE_HOST": getenv("DATABASE_HOST", "localhost"),
-      "DATABASE_NAME": fmt.Sprintf("movies_api_%s", env),
-      "DATABASE_PASSWORD": getenv("DATABASE_PASSWORD", ""),
-      "DATABASE_URL": getenv("DATABASE_URL", ""),
-      "DATABASE_USERNAME": getenv("DATABASE_USERNAME", user.Username),
-    },
-  }
-  app.Initialize()
-  app.Run(":8000")
+	app := App{
+		ENV: map[string]string{
+			"DATABASE_HOST":     getenv("DATABASE_HOST", "localhost"),
+			"DATABASE_NAME":     fmt.Sprintf("movies_api_%s", env),
+			"DATABASE_PASSWORD": getenv("DATABASE_PASSWORD", ""),
+			"DATABASE_URL":      getenv("DATABASE_URL", ""),
+			"DATABASE_USERNAME": getenv("DATABASE_USERNAME", user.Username),
+		},
+	}
+
+	if err := http.ListenAndServe(":8000", app.Handler()); err != nil {
+		log.Fatal(err)
+	}
 }
