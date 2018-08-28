@@ -1,10 +1,16 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"database/sql"
+  "fmt"
+  "log"
 	"net/http"
 	"os/user"
+  _ "github.com/lib/pq"
+
+	"github.com/kelseyhightower/envconfig"
+
+  "github.com/macedo/movies-api/app"
 )
 
 //func GetMovieInfo() {
@@ -23,26 +29,56 @@ import (
 //fmt.Println(string(responseData))
 //}
 
+type Config struct {
+	Database Database
+	Env      string
+}
+
+type Database struct {
+	Username string
+	Password string
+	Host     string
+	URL      string
+}
+
 func main() {
-	env := getenv("ENV", "development")
+	var c Config
+	_ = envconfig.Process("", &c)
 
-	user, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
+	var connStr string
+
+	if c.Database.URL != "" {
+		connStr = c.Database.URL
+	} else {
+    var env string
+    if env = c.Env; env == "" {
+      env = "development"
+    }
+		dbname := fmt.Sprintf("movies_api_%s", env)
+
+		var dbusername string
+		if c.Database.Username == "" {
+			user, err := user.Current()
+			if err != nil {
+        log.Fatal(err)
+			}
+			dbusername = user.Username
+		} else {
+			dbusername = c.Database.Username
+		}
+		connStr = fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", dbusername, c.Database.Password, c.Database.Host, dbname)
 	}
 
-	app := App{
-		ENV: map[string]string{
-			"DATABASE_HOST":     getenv("DATABASE_HOST", "localhost"),
-			"DATABASE_NAME":     fmt.Sprintf("movies_api_%s", env),
-			"DATABASE_PASSWORD": getenv("DATABASE_PASSWORD", ""),
-			"DATABASE_URL":      getenv("DATABASE_URL", ""),
-			"DATABASE_USERNAME": getenv("DATABASE_USERNAME", user.Username),
-		},
-	}
+  fmt.Println(connStr)
 
-  app.Initialize()
-	if err := http.ListenAndServe(":8000", app.Handler()); err != nil {
-		log.Fatal(err)
-	}
+  dbConn, err := sql.Open("postgres", connStr)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  app := app.New(dbConn)
+
+  if err := http.ListenAndServe(":8000", app.Handler()); err != nil {
+    log.Fatal(err)
+  }
 }
