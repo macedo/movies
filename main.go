@@ -2,15 +2,15 @@ package main
 
 import (
 	"database/sql"
-  "fmt"
-  "log"
+	"fmt"
+	_ "github.com/lib/pq"
+	"log"
 	"net/http"
 	"os/user"
-  _ "github.com/lib/pq"
 
 	"github.com/kelseyhightower/envconfig"
 
-  "github.com/macedo/movies-api/app"
+	"github.com/macedo/movies-api/app"
 )
 
 //func GetMovieInfo() {
@@ -50,17 +50,17 @@ func main() {
 	if c.Database.URL != "" {
 		connStr = c.Database.URL
 	} else {
-    var env string
-    if env = c.Env; env == "" {
-      env = "development"
-    }
+		var env string
+		if env = c.Env; env == "" {
+			env = "development"
+		}
 		dbname := fmt.Sprintf("movies_api_%s", env)
 
 		var dbusername string
 		if c.Database.Username == "" {
 			user, err := user.Current()
 			if err != nil {
-        log.Fatal(err)
+				log.Fatal(err)
 			}
 			dbusername = user.Username
 		} else {
@@ -69,16 +69,16 @@ func main() {
 		connStr = fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", dbusername, c.Database.Password, c.Database.Host, dbname)
 	}
 
-  fmt.Println(connStr)
+	fmt.Println(connStr)
 
-  dbConn, err := sql.Open("postgres", connStr)
-  if err != nil {
-    log.Fatal(err)
-  }
+	dbConn, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  app := app.New(dbConn)
+	app := app.New(dbConn)
 
-  if err := http.ListenAndServe(":8000", app.Handler()); err != nil {
-    log.Fatal(err)
-  }
+	if err := http.ListenAndServe(":8000", app.Handler()); err != nil {
+		log.Fatal(err)
+	}
 }
