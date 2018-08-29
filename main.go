@@ -2,10 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
-	"os/user"
 
 	_ "github.com/lib/pq"
 	"github.com/macedo/movies-api/api"
@@ -32,35 +30,17 @@ import (
 
 func main() {
 	var c types.Config
-	_ = envconfig.Process("", &c)
 
-	var connStr string
-
-	if c.Database.URL != "" {
-		connStr = c.Database.URL
-	} else {
-		var env string
-		if env = c.Env; env == "" {
-			env = "development"
-		}
-		dbname := fmt.Sprintf("movies_api_%s", env)
-
-		var dbusername string
-		if c.Database.Username == "" {
-			user, err := user.Current()
-			if err != nil {
-				log.Fatal(err)
-			}
-			dbusername = user.Username
-		} else {
-			dbusername = c.Database.Username
-		}
-		connStr = fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", dbusername, c.Database.Password, c.Database.Host, dbname)
+	if err := envconfig.Process("", &c); err != nil {
+		log.Fatal(err)
 	}
 
-	fmt.Println(connStr)
+	conn, err := NewConnection(c)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	dbConn, err := sql.Open("postgres", connStr)
+	dbConn, err := sql.Open("postgres", conn.PostgresURI())
 	if err != nil {
 		log.Fatal(err)
 	}
