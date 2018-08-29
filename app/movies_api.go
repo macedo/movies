@@ -1,20 +1,34 @@
 package app
 
 import (
-  "net/http"
+	"net/http"
+
+	"github.com/gorilla/mux"
+
+	"github.com/macedo/movies-api/repository"
 )
 
-func InitializeMovie() {
-  App.Router.HandleFunc("/movies", movieIndex).Methods("GET")
+type MovieAPI struct {
+	r repository.MovieRepo
 }
 
-func movieIndex(w http.ResponseWriter, r *http.Request) {
-  movies, err := App.movie.Get()
+func NewMovieAPI(r repository.MovieRepo, root *mux.Router) MovieAPI {
+	api := MovieAPI{r: r}
 
-  if err != nil {
-    respondWithError(w, http.StatusInternalServerError, err.Error())
-    return
-  }
+	// register movie API routes
+	subrouter := root.PathPrefix("/movies").Subrouter()
+	subrouter.HandleFunc("/", api.indexHandler).Methods("GET")
 
-  respondWithJson(w, http.StatusOK, movies)
+	return api
+}
+
+func (api MovieAPI) indexHandler(w http.ResponseWriter, r *http.Request) {
+	movies, err := api.r.Get()
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJson(w, http.StatusOK, movies)
 }

@@ -1,44 +1,32 @@
 package app
 
 import (
-  "database/sql"
-  "net/http"
-  l4g "github.com/alecthomas/log4go"
-  "github.com/gorilla/mux"
-  "github.com/macedo/movies-api/repository"
+	"database/sql"
+	"net/http"
+
+	l4g "github.com/alecthomas/log4go"
+	"github.com/gorilla/mux"
+	"github.com/macedo/movies-api/repository"
 )
 
 type Application struct {
-  Router *mux.Router
-  DB  *sql.DB
-
-  movie repository.MovieRepo
+	r        *mux.Router
+	movieAPI MovieAPI
 }
 
-var App *Application
+func New(db *sql.DB) *Application {
+	l4g.Info("App Initializing...")
 
-func New(db *sql.DB) Application {
-  l4g.Info("App Initializing...")
+	app := &Application{
+		r: mux.NewRouter().StrictSlash(true),
+	}
 
-  App = &Application{
-    DB: db,
-    Router: NewRouter(),
-  }
+	repo := repository.New(db)
+	app.movieAPI = NewMovieAPI(repo, app.r)
 
-  App.initializeRepos()
-  App.initializeRoutes()
-
-  return *App
+	return app
 }
 
 func (a *Application) Handler() http.Handler {
-  return a.Router
-}
-
-func (a *Application) initializeRepos() {
-  App.movie = repository.New(App.DB)
-}
-
-func (a *Application) initializeRoutes() {
-  InitializeMovie()
+	return a.r
 }
