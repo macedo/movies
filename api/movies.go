@@ -1,10 +1,9 @@
-package app
+package api
 
 import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-
 	"github.com/macedo/movies-api/repository"
 )
 

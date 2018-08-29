@@ -1,9 +1,10 @@
-package app
+package api
 
 import (
 	"encoding/json"
 	"net/http"
 )
+
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	respondWithJson(w, code, map[string]string{"error": message})
 }

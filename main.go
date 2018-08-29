@@ -3,14 +3,14 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os/user"
 
-	"github.com/kelseyhightower/envconfig"
+	_ "github.com/lib/pq"
+	"github.com/macedo/movies-api/api"
 
-	"github.com/macedo/movies-api/app"
+	"github.com/kelseyhightower/envconfig"
 )
 
 //func GetMovieInfo() {
@@ -76,9 +76,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app := app.New(dbConn)
-
-	if err := http.ListenAndServe(":8000", app.Handler()); err != nil {
+	if err := http.ListenAndServe(":8000", api.New(dbConn).Handler()); err != nil {
 		log.Fatal(err)
 	}
 }
