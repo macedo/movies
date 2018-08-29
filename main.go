@@ -9,6 +9,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/macedo/movies-api/api"
+	"github.com/macedo/movies-api/types"
 
 	"github.com/kelseyhightower/envconfig"
 )
@@ -29,20 +30,8 @@ import (
 //fmt.Println(string(responseData))
 //}
 
-type Config struct {
-	Database Database
-	Env      string
-}
-
-type Database struct {
-	Username string
-	Password string
-	Host     string
-	URL      string
-}
-
 func main() {
-	var c Config
+	var c types.Config
 	_ = envconfig.Process("", &c)
 
 	var connStr string
