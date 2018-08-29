@@ -31,5 +31,5 @@ func (api MovieAPI) indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJson(w, http.StatusOK, movies)
+	respondWithJSON(w, http.StatusOK, movies)
 }

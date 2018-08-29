@@ -27,7 +27,7 @@ func (mr MovieRepository) Get() ([]types.Movie, error) {
 
 	defer rows.Close()
 
-	movies := []types.Movie{}
+	var movies []types.Movie
 
 	for rows.Next() {
 		var m types.Movie
