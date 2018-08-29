@@ -6,15 +6,15 @@ import (
 	"github.com/macedo/movies-api/types"
 )
 
-type MovieRepo struct {
+type MovieRepository struct {
 	db *sql.DB
 }
 
-func New(db *sql.DB) MovieRepo {
-	return MovieRepo{db: db}
+func New(db *sql.DB) MovieRepository {
+	return MovieRepository{db: db}
 }
 
-func (mr MovieRepo) Get() ([]types.Movie, error) {
+func (mr MovieRepository) Get() ([]types.Movie, error) {
 	rows, err := mr.db.Query("SELECT * FROM movies")
 
 	if err != nil {

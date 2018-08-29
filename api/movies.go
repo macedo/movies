@@ -8,10 +8,10 @@ import (
 )
 
 type MovieAPI struct {
-	r repository.MovieRepo
+	r repository.MovieRepository
 }
 
-func NewMovieAPI(r repository.MovieRepo, root *mux.Router) MovieAPI {
+func NewMovieAPI(r repository.MovieRepository, root *mux.Router) MovieAPI {
 	api := MovieAPI{r: r}
 
 	// register movie API routes
