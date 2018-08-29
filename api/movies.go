@@ -7,10 +7,12 @@ import (
 	"github.com/macedo/movies-api/repository"
 )
 
+// MovieAPI represents the API for movies
 type MovieAPI struct {
 	r repository.MovieRepository
 }
 
+// NewMovieAPI creates a MovieAPI and register movie endpoints on root router
 func NewMovieAPI(r repository.MovieRepository, root *mux.Router) MovieAPI {
 	api := MovieAPI{r: r}
 

@@ -6,14 +6,18 @@ import (
 	"github.com/macedo/movies-api/types"
 )
 
+//MovieRepository comunicates with database in order to manage
+// movies entries
 type MovieRepository struct {
 	db *sql.DB
 }
 
+// New create a MovieRepository
 func New(db *sql.DB) MovieRepository {
 	return MovieRepository{db: db}
 }
 
+// Get retuns a list of movies
 func (mr MovieRepository) Get() ([]types.Movie, error) {
 	rows, err := mr.db.Query("SELECT * FROM movies")
 
