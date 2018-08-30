@@ -12,25 +12,24 @@ import (
 // Application represents the root API which is the entrypoint
 // for all requests
 type Application struct {
-	r        *mux.Router
 	movieAPI MovieAPI
 }
 
 // New creates an Application and register all API endpoints on it
-func New(db *sql.DB) *Application {
+func New(db *sql.DB) Application {
 	l4g.Info("App Initializing...")
 
-	app := &Application{
-		r: mux.NewRouter().StrictSlash(true),
-	}
-
 	repo := repository.New(db)
-	app.movieAPI = NewMovieAPI(repo, app.r)
 
-	return app
+	return Application{
+		movieAPI: NewMovieAPI(repo),
+	}
 }
 
 // Handler returns the application handler
-func (a *Application) Handler() http.Handler {
-	return a.r
+func (a Application) Handler() http.Handler {
+	r := mux.NewRouter().StrictSlash(true)
+	r.Handle("/movies", a.movieAPI.Handler())
+
+	return r
 }

@@ -17,3 +17,8 @@ type Database struct {
 	Host     string
 	URL      string
 }
+
+// MovieRepository represents an interface for get movies information
+type MovieRepository interface {
+	Get() ([]Movie, error)
+}

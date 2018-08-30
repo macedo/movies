@@ -4,23 +4,25 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/macedo/movies-api/repository"
+	"github.com/macedo/movies-api/types"
 )
 
 // MovieAPI represents the API for movies
 type MovieAPI struct {
-	r repository.MovieRepository
+	r types.MovieRepository
 }
 
-// NewMovieAPI creates a MovieAPI and register movie endpoints on root router
-func NewMovieAPI(r repository.MovieRepository, root *mux.Router) MovieAPI {
-	api := MovieAPI{r: r}
+// NewMovieAPI creates a MovieAPI
+func NewMovieAPI(r types.MovieRepository) MovieAPI {
+	return MovieAPI{r: r}
+}
 
-	// register movie API routes
-	subrouter := root.PathPrefix("/movies").Subrouter()
-	subrouter.HandleFunc("/", api.indexHandler).Methods("GET")
+// Handler expose service's routes
+func (api MovieAPI) Handler() *mux.Router {
+	r := mux.NewRouter()
+	r.HandleFunc("/movies", api.indexHandler).Methods("GET")
 
-	return api
+	return r
 }
 
 func (api MovieAPI) indexHandler(w http.ResponseWriter, r *http.Request) {
